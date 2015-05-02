@@ -1,6 +1,8 @@
-#+title: PureScript bindings for node-postgres
+#+title: PureScript any-db bindings
 
-This is an initial experiment in providing bindings to the [[https://www.npmjs.org/package/pg][pg library]] ([[https://github.com/brianc/node-postgres][node-postgres]] on GitHub). It's currently in pre-alpha state. In fact, if a letter existed before alpha, I would have chosen that.
+* About
+
+Bindings for [[https://github.com/grncdr/node-any-db][node-any-db]] forked from [[https://github.com/epost/purescript-node-postgres][purescript-node-postgres]].
 
 * Installation
 
@@ -30,7 +32,6 @@ cat schema.sql | psql --username=testuser test
 Let's run some tests:
 
 #+begin_src bash
-pulp install
 pulp test
 #+end_src
 

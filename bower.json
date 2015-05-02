@@ -1,5 +1,5 @@
 {
-  "name": "purescript-node-postgres",
+  "name": "purescript-any-db",
   "version": "0.1.0",
   "moduleType": ["node"],
   "authors": [

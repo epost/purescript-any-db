@@ -10,10 +10,10 @@ newtype Query a
 ```
 
 
-#### `Client`
+#### `Connection`
 
 ``` purescript
-data Client :: *
+data Connection :: *
 ```
 
 
@@ -24,6 +24,13 @@ data DB :: !
 ```
 
 
+#### `ConnectionString`
+
+``` purescript
+type ConnectionString = String
+```
+
+
 #### `ConnectionInfo`
 
 ``` purescript
@@ -31,10 +38,17 @@ type ConnectionInfo = { password :: String, user :: String, port :: Number, db :
 ```
 
 
+#### `mkConnectionString`
+
+``` purescript
+mkConnectionString :: ConnectionInfo -> ConnectionString
+```
+
+
 #### `connect`
 
 ``` purescript
-connect :: forall eff. ConnectionInfo -> Aff (db :: DB | eff) Client
+connect :: forall eff. ConnectionInfo -> Aff (db :: DB | eff) Connection
 ```
 
 Makes a connection to the database.
@@ -42,7 +56,7 @@ Makes a connection to the database.
 #### `execute`
 
 ``` purescript
-execute :: forall eff a. Query a -> [SqlValue] -> Client -> Aff (db :: DB | eff) Unit
+execute :: forall eff a. Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) Unit
 ```
 
 Runs a query and returns nothing.
@@ -50,7 +64,7 @@ Runs a query and returns nothing.
 #### `execute_`
 
 ``` purescript
-execute_ :: forall eff a. Query a -> Client -> Aff (db :: DB | eff) Unit
+execute_ :: forall eff a. Query a -> Connection -> Aff (db :: DB | eff) Unit
 ```
 
 Runs a query and returns nothing
@@ -58,7 +72,7 @@ Runs a query and returns nothing
 #### `query`
 
 ``` purescript
-query :: forall eff a p. (IsForeign a) => Query a -> [SqlValue] -> Client -> Aff (db :: DB | eff) [F a]
+query :: forall eff a. (IsForeign a) => Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) [F a]
 ```
 
 Runs a query and returns all results.
@@ -66,7 +80,7 @@ Runs a query and returns all results.
 #### `query_`
 
 ``` purescript
-query_ :: forall eff a. (IsForeign a) => Query a -> Client -> Aff (db :: DB | eff) [a]
+query_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) [a]
 ```
 
 Just like `query` but does not make any param replacement
@@ -74,7 +88,7 @@ Just like `query` but does not make any param replacement
 #### `queryOne`
 
 ``` purescript
-queryOne :: forall eff a. (IsForeign a) => Query a -> [SqlValue] -> Client -> Aff (db :: DB | eff) (Maybe a)
+queryOne :: forall eff a. (IsForeign a) => Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) (Maybe a)
 ```
 
 Runs a query and returns the first row, if any
@@ -82,7 +96,7 @@ Runs a query and returns the first row, if any
 #### `queryOne_`
 
 ``` purescript
-queryOne_ :: forall eff a. (IsForeign a) => Query a -> Client -> Aff (db :: DB | eff) (Maybe a)
+queryOne_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Maybe a)
 ```
 
 Just like `queryOne` but does not make any param replacement
@@ -90,7 +104,7 @@ Just like `queryOne` but does not make any param replacement
 #### `queryValue`
 
 ``` purescript
-queryValue :: forall eff a. (IsForeign a) => Query a -> [SqlValue] -> Client -> Aff (db :: DB | eff) (Maybe a)
+queryValue :: forall eff a. (IsForeign a) => Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) (Maybe a)
 ```
 
 Runs a query and returns a single value, if any.
@@ -98,7 +112,7 @@ Runs a query and returns a single value, if any.
 #### `queryValue_`
 
 ``` purescript
-queryValue_ :: forall eff a. (IsForeign a) => Query a -> Client -> Aff (db :: DB | eff) (Maybe a)
+queryValue_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Maybe a)
 ```
 
 Just like `queryValue` but does not make any param replacement
@@ -106,18 +120,61 @@ Just like `queryValue` but does not make any param replacement
 #### `withConnection`
 
 ``` purescript
-withConnection :: forall eff a. ConnectionInfo -> (Client -> Aff (db :: DB | eff) a) -> Aff (db :: DB | eff) a
+withConnection :: forall eff a. ConnectionInfo -> (Connection -> Aff (db :: DB | eff) a) -> Aff (db :: DB | eff) a
 ```
 
-Connects to the database, calls the provided function with the client
+Connects to the database, calls the provided function with the connection
 and returns the results.
 
 #### `end`
 
 ``` purescript
-end :: forall eff. Client -> Eff (db :: DB | eff) Unit
+end :: forall eff. Connection -> Eff (db :: DB | eff) Unit
 ```
 
+
+
+## Module Database.Postgres.Pool
+
+
+#### `Pool`
+
+``` purescript
+data Pool :: *
+```
+
+
+#### `createPool`
+
+``` purescript
+createPool :: forall eff. ConnectionInfo -> Eff (db :: DB | eff) Pool
+```
+
+Create a connection pool.
+
+#### `createPoolFromString`
+
+``` purescript
+createPoolFromString :: forall eff. ConnectionString -> Eff (db :: DB | eff) Pool
+```
+
+Create a connection pool. Remember to call `closePool`.
+
+#### `closePool`
+
+``` purescript
+closePool :: forall eff. Pool -> Eff (db :: DB | eff) Unit
+```
+
+Close the connection pool.
+
+#### `withPool`
+
+``` purescript
+withPool :: forall eff a. Pool -> (Connection -> Aff (db :: DB | eff) a) -> Aff (db :: DB | eff) a
+```
+
+Run a database action with a connection from the specified `Pool`.
 
 
 ## Module Database.Postgres.SqlValue
