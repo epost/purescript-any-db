@@ -56,7 +56,7 @@ exampleLowLevel = do
   con <- connect connectionInfo
   artists <- query_ (Query "select * from artist order by name desc" :: Query Artist) con
   liftEff $ printRows artists
-  liftEff $ end con
+  liftEff $ close con
 
 exampleError :: forall eff. Aff (db :: DB | eff) (Maybe Artist)
 exampleError = withConnection connectionInfo $ \c -> do

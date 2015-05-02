@@ -6,7 +6,7 @@ module Database.AnyDB
   , ConnectionString()
   , mkConnectionString
   , connect
-  , end
+  , close
   , execute, execute_
   , query, query_
   , queryValue, queryValue_
@@ -114,7 +114,7 @@ withConnection :: forall eff a.
                -> Aff (db :: DB | eff) a
 withConnection info p = do
   con <- connect info
-  finally (p con) $ liftEff (end con)
+  finally (p con) $ liftEff (close con)
 
 liftError :: forall e a. ForeignError -> Aff e a
 liftError err = throwError $ error (show err)
@@ -200,8 +200,8 @@ foreign import runQueryValue """
   }
   """ :: forall eff. String -> [SqlValue] -> Connection -> Aff (db :: DB | eff) Foreign
 
-foreign import end """
-  function end(con) {
+foreign import close """
+  function close(con) {
     return function() {
       con.end();
     };

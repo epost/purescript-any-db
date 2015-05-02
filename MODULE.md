@@ -126,10 +126,10 @@ withConnection :: forall eff a. ConnectionInfo -> (Connection -> Aff (db :: DB |
 Connects to the database, calls the provided function with the connection
 and returns the results.
 
-#### `end`
+#### `close`
 
 ``` purescript
-end :: forall eff. Connection -> Eff (db :: DB | eff) Unit
+close :: forall eff. Connection -> Eff (db :: DB | eff) Unit
 ```
 
 
