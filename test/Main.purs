@@ -2,6 +2,7 @@ module Test.Main where
 
 import Database.Postgres
 import Database.Postgres.SqlValue
+import Database.Postgres.Pool
 import Debug.Trace
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
@@ -25,6 +26,7 @@ main = runAff (trace <<< show) (const $ trace "All ok") $ do
   liftEff $ either (const $ trace "got an error, like we should") (const $ trace "FAIL") res
 
   exampleQueries
+  exampleUsingWithPool
 
 data Artist = Artist
   { name :: String
@@ -71,6 +73,14 @@ exampleQueries = withConnection connectionInfo $ \c -> do
   execute_ (Query "insert into artist values ('Toto', 1977)") c
   artists <- query (Query "select * from artist where name = $1" :: Query Artist) [toSql "Toto"] c
   liftEff $ printRows artists
+
+exampleUsingWithPool :: forall eff. Aff (trace :: Trace, db :: DB | eff) Unit
+exampleUsingWithPool = do
+  pool <- liftEff $ createPool connectionInfo
+  withPool pool $ \c -> do
+    artists <- query_ (Query "select * from artist" :: Query Artist) c
+    liftEff $ printRows artists
+  liftEff $ closePool pool
 
 printRows :: forall a eff. (Show a) => [a] -> Eff (trace :: Trace | eff) Unit
 printRows rows = trace $ "result:\n" <> foldMap stringify rows
