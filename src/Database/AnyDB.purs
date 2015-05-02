@@ -68,9 +68,8 @@ execute_ :: forall eff a. Query a -> Connection -> Aff (db :: DB | eff) Unit
 execute_ (Query sql) con = void $ runQuery_ sql con
 
 -- | Runs a query and returns all results.
-query :: forall eff a
-  . (IsForeign a)
-  => Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) [F a]
+query :: forall eff a. (IsForeign a) =>
+         Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) [F a]
 query (Query sql) params con = do
   rows <- runQuery sql params con
   pure $ read <$> rows
@@ -82,9 +81,8 @@ query_ (Query sql) con = do
   either liftError pure (sequence $ read <$> rows)
 
 -- | Runs a query and returns the first row, if any
-queryOne :: forall eff a
-  . (IsForeign a)
-  => Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) (Maybe a)
+queryOne :: forall eff a. (IsForeign a) =>
+            Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryOne (Query sql) params con = do
   rows <- runQuery sql params con
   maybe (pure Nothing) (either liftError (pure <<< Just)) $ read <$> (rows !! 0)
@@ -96,9 +94,8 @@ queryOne_ (Query sql) con = do
   maybe (pure Nothing) (either liftError (pure <<< Just)) $ read <$> (rows !! 0)
 
 -- | Runs a query and returns a single value, if any.
-queryValue :: forall eff a
-  . (IsForeign a)
-  => Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) (Maybe a)
+queryValue :: forall eff a. (IsForeign a) =>
+              Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryValue (Query sql) params con = do
   val <- runQueryValue sql params con
   pure $ either (const Nothing) Just (read val)
@@ -111,10 +108,10 @@ queryValue_ (Query sql) con = do
 
 -- | Connects to the database, calls the provided function with the connection
 -- | and returns the results.
-withConnection :: forall eff a
-  . ConnectionInfo
-  -> (Connection -> Aff (db :: DB | eff) a)
-  -> Aff (db :: DB | eff) a
+withConnection :: forall eff a.
+                  ConnectionInfo
+               -> (Connection -> Aff (db :: DB | eff) a)
+               -> Aff (db :: DB | eff) a
 withConnection info p = do
   con <- connect info
   finally (p con) $ liftEff (end con)
