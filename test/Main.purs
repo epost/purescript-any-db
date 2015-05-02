@@ -1,8 +1,8 @@
 module Test.Main where
 
-import Database.Postgres
-import Database.Postgres.SqlValue
-import Database.Postgres.Pool
+import Database.AnyDB
+import Database.AnyDB.SqlValue
+import Database.AnyDB.Pool
 import Debug.Trace
 import Control.Monad.Eff
 import Control.Monad.Eff.Class

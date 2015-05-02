@@ -1,4 +1,4 @@
-module Database.Postgres
+module Database.AnyDB
   ( Query(..)
   , Connection()
   , DB()
@@ -28,7 +28,7 @@ import Control.Monad.Eff.Exception(Error(), error)
 import Control.Monad.Error.Class (throwError)
 import Data.Traversable (sequence)
 
-import Database.Postgres.SqlValue
+import Database.AnyDB.SqlValue
 
 newtype Query a = Query String
 

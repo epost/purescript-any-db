@@ -1,6 +1,6 @@
 # Module Documentation
 
-## Module Database.Postgres
+## Module Database.AnyDB
 
 #### `Query`
 
@@ -134,7 +134,7 @@ end :: forall eff. Connection -> Eff (db :: DB | eff) Unit
 
 
 
-## Module Database.Postgres.Pool
+## Module Database.AnyDB.Pool
 
 
 #### `Pool`
@@ -177,7 +177,7 @@ withPool :: forall eff a. Pool -> (Connection -> Aff (db :: DB | eff) a) -> Aff 
 Run a database action with a connection from the specified `Pool`.
 
 
-## Module Database.Postgres.SqlValue
+## Module Database.AnyDB.SqlValue
 
 #### `SqlValue`
 

@@ -1,5 +1,5 @@
 -- See https://github.com/grncdr/node-any-db-pool
-module Database.Postgres.Pool
+module Database.AnyDB.Pool
   ( Pool()
   , withPool
   , createPool
@@ -20,7 +20,7 @@ import Data.Foreign
 import Data.Foreign.Class
 import Data.Maybe
 import Data.Traversable (sequence)
-import Database.Postgres
+import Database.AnyDB
 
 foreign import data Pool :: *
 

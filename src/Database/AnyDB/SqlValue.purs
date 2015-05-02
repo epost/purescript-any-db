@@ -1,4 +1,4 @@
-module Database.Postgres.SqlValue
+module Database.AnyDB.SqlValue
   ( SqlValue()
   , IsSqlValue
   , toSql
