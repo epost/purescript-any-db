@@ -16,6 +16,7 @@
   ],
   "dependencies": {
     "purescript-arrays": "~0.3.7",
+    "purescript-control": "~0.2.6",
     "purescript-either": "~0.1.8",
     "purescript-foreign": "~0.4.2",
     "purescript-foldable-traversable": "~0.3.1",

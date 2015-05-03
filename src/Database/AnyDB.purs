@@ -29,6 +29,7 @@ import Control.Monad.Error.Class (throwError)
 import Data.Traversable (sequence)
 
 import Database.AnyDB.SqlValue
+import Database.AnyDB.Util
 
 newtype Query a = Query String
 
@@ -118,13 +119,6 @@ withConnection info p = do
 
 liftError :: forall e a. ForeignError -> Aff e a
 liftError err = throwError $ error (show err)
-
-finally :: forall eff a. Aff eff a -> Aff eff Unit -> Aff eff a
-finally a sequel = do
-  res <- attempt a
-  sequel
-  either throwError pure res
-
 
 foreign import connect' """
   function connect$prime(conString) {

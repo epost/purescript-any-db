@@ -9,7 +9,7 @@ Bindings for [[https://github.com/grncdr/node-any-db][node-any-db]] forked from 
 I'll assume you have [[http://www.purescript.org/][PureScript]] and [[http://www.postgresql.org/][PostgreSQL]] installed. You'll also need [[https://github.com/bodil/pulp][purescript-pulp]] and the postgres version of [[https://github.com/grncdr/node-any-db][node-any-db]]:
 
 #+begin_src bash
-npm install any-db-postgres
+npm install any-db-postgres any-db-transaction
 npm install pulp
 #+end_src
 

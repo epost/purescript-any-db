@@ -3,6 +3,7 @@ module Test.Main where
 import Database.AnyDB
 import Database.AnyDB.SqlValue
 import Database.AnyDB.Pool
+import Database.AnyDB.Transaction
 import Debug.Trace
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
@@ -27,6 +28,7 @@ main = runAff (trace <<< show) (const $ trace "All ok") $ do
 
   exampleQueries
   exampleUsingWithPool
+  exampleUsingWithTransaction
 
 data Artist = Artist
   { name :: String
@@ -81,6 +83,11 @@ exampleUsingWithPool = do
     artists <- query_ (Query "select * from artist" :: Query Artist) c
     liftEff $ printRows artists
   liftEff $ closePool pool
+
+exampleUsingWithTransaction :: forall eff. Aff (trace :: Trace, db :: DB | eff) Unit
+exampleUsingWithTransaction = withTransaction connectionInfo $ \c -> do
+  artists <- query_ (Query "select * from artist" :: Query Artist) c
+  liftEff $ printRows artists
 
 printRows :: forall a eff. (Show a) => [a] -> Eff (trace :: Trace | eff) Unit
 printRows rows = trace $ "result:\n" <> foldMap stringify rows
