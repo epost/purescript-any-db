@@ -3,19 +3,8 @@ module Database.AnyDB.Transaction
   , withTransaction
   ) where
 
-import Control.Alt
-import Control.Bind ((<=<))
 import Control.Monad.Aff
 import Control.Monad.Eff
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Exception (Error(), error)
-import Control.Monad.Trans
-import Data.Array
-import Data.Either
-import Data.Foreign
-import Data.Foreign.Class
-import Data.Maybe
-import Data.Traversable (sequence)
 import Database.AnyDB
 import Database.AnyDB.Util (finally)
 
@@ -26,16 +15,15 @@ withTransaction :: forall eff a.
   -> Connection
   -> Aff (db :: DB | eff) a
 withTransaction p con = do
-    tx  <- beginTransaction con
-    res <- p con
-    commitTransaction tx
-    return res
+  tx  <- beginTransaction con
+  res <- p con
+  commitTransaction tx
+  return res
 
 foreign import beginTransaction """
   function beginTransaction(con) {
     return function(success, error) {
       var begin = require('any-db-transaction');
-
       begin(con, function(err, tx) {
          if (err) {
            error(err);
