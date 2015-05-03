@@ -223,4 +223,32 @@ instance isSqlValueMaybe :: (IsSqlValue a) => IsSqlValue (Maybe a)
 
 
 
+## Module Database.AnyDB.Transaction
+
+#### `Transaction`
+
+``` purescript
+data Transaction :: *
+```
+
+
+#### `withTransaction`
+
+``` purescript
+withTransaction :: forall eff a. (Connection -> Aff (db :: DB | eff) a) -> Connection -> Aff (db :: DB | eff) a
+```
+
+
+
+## Module Database.AnyDB.Util
+
+#### `finally`
+
+``` purescript
+finally :: forall e a. Aff e a -> Aff e Unit -> Aff e a
+```
+
+Compute `aff1`, followed by `aff2` regardless of whether `aff1` terminated successfully.
+
+
 
