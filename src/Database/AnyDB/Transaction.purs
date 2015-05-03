@@ -1,4 +1,7 @@
-module Database.AnyDB.Transaction where
+module Database.AnyDB.Transaction
+  ( Transaction ()
+  , withTransaction
+  ) where
 
 import Control.Alt
 import Control.Bind ((<=<))
@@ -19,21 +22,19 @@ import Database.AnyDB.Util (finally)
 foreign import data Transaction :: *
 
 withTransaction :: forall eff a.
-                   ConnectionInfo
-                -> (Connection -> Aff (db :: DB | eff) a)
-                ->                Aff (db :: DB | eff) a
-withTransaction ci p =
-  withConnection ci $ \con -> do
-    tx   <- _beginTransaction con
-    res2 <- p con
-    _commitTransaction tx
-    return res2
+     (Connection -> Aff (db :: DB | eff) a)
+  -> Connection
+  -> Aff (db :: DB | eff) a
+withTransaction p con = do
+    tx  <- beginTransaction con
+    res <- p con
+    commitTransaction tx
+    return res
 
-foreign import _beginTransaction """
-  function _beginTransaction(con) {
+foreign import beginTransaction """
+  function beginTransaction(con) {
     return function(success, error) {
-      var anyDB = require('any-db'),
-          begin = require('any-db-transaction');
+      var begin = require('any-db-transaction');
 
       begin(con, function(err, tx) {
          if (err) {
@@ -46,12 +47,10 @@ foreign import _beginTransaction """
   }
   """ :: forall eff. Connection -> Aff (db :: DB | eff) Transaction
 
-foreign import _commitTransaction """
-  function _commitTransaction(tx) {
+foreign import commitTransaction """
+  function commitTransaction(tx) {
     return function(success, error) {
-        tx.commit(success, error);
+      tx.commit(success, error);
     };
   }
   """ :: forall eff. Transaction -> Aff (db :: DB | eff) Unit
-
-

@@ -85,9 +85,10 @@ exampleUsingWithPool = do
   liftEff $ closePool pool
 
 exampleUsingWithTransaction :: forall eff. Aff (trace :: Trace, db :: DB | eff) Unit
-exampleUsingWithTransaction = withTransaction connectionInfo $ \c -> do
-  artists <- query_ (Query "select * from artist" :: Query Artist) c
-  liftEff $ printRows artists
+exampleUsingWithTransaction =
+  withConnection connectionInfo $ withTransaction \con -> do
+    artists <- query_ (Query "select * from artist" :: Query Artist) con
+    liftEff $ printRows artists
 
 printRows :: forall a eff. (Show a) => [a] -> Eff (trace :: Trace | eff) Unit
 printRows rows = trace $ "result:\n" <> foldMap stringify rows
