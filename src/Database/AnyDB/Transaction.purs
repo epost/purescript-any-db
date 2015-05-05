@@ -6,7 +6,6 @@ module Database.AnyDB.Transaction
 import Control.Monad.Aff
 import Control.Monad.Eff
 import Database.AnyDB
-import Database.AnyDB.Util (finally)
 
 foreign import data Transaction :: *
 

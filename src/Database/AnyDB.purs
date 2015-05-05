@@ -29,7 +29,6 @@ import Control.Monad.Error.Class (throwError)
 import Data.Traversable (sequence)
 
 import Database.AnyDB.SqlValue
-import Database.AnyDB.Util
 
 newtype Query a = Query String
 
