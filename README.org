@@ -1,8 +1,12 @@
 #+title: PureScript any-db bindings
 
+* Caveat
+
+This is alpha quality software. It doesn't work with the latest versions of the PureScript compiler (yet).
+
 * About
 
-Bindings for [[https://github.com/grncdr/node-any-db][node-any-db]] forked from [[https://github.com/epost/purescript-node-postgres][purescript-node-postgres]].
+Bindings for [[https://github.com/grncdr/node-any-db][node-any-db]] forked from [[https://github.com/epost/purescript-node-postgres][purescript-node-postgres]], with a slightly more fine-grained API.
 
 * Installation
 
