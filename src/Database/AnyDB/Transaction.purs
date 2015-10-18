@@ -3,6 +3,7 @@ module Database.AnyDB.Transaction
   , withTransaction
   ) where
 
+import Prelude
 import Control.Monad.Aff
 import Control.Monad.Eff
 import Database.AnyDB
@@ -19,25 +20,6 @@ withTransaction p con = do
   commitTransaction tx
   return res
 
-foreign import beginTransaction """
-  function beginTransaction(con) {
-    return function(success, error) {
-      var begin = require('any-db-transaction');
-      begin(con, function(err, tx) {
-         if (err) {
-           error(err);
-         } else {
-           success(tx, error);
-         }
-      });
-    };
-  }
-  """ :: forall eff. Connection -> Aff (db :: DB | eff) Transaction
+foreign import beginTransaction :: forall eff. Connection -> Aff (db :: DB | eff) Transaction
 
-foreign import commitTransaction """
-  function commitTransaction(tx) {
-    return function(success, error) {
-      tx.commit(success, error);
-    };
-  }
-  """ :: forall eff. Transaction -> Aff (db :: DB | eff) Unit
+foreign import commitTransaction :: forall eff. Transaction -> Aff (db :: DB | eff) Unit
