@@ -2,8 +2,10 @@ module Database.AnyDB
   ( Query(..)
   , Connection()
   , DB()
-  , ConnectionInfo()
+  , ConnectionInfo(..)
   , ConnectionString()
+  , PgConnectionInfo
+  , Sqlite3ConnectionInfo
   , mkConnectionString
   , connect
   , close
@@ -39,7 +41,7 @@ foreign import data DB :: !
 
 type ConnectionString = String
 
-type ConnectionInfo =
+type PgConnectionInfo =
   { host :: String
   , db :: String
   , port :: Int
@@ -47,14 +49,29 @@ type ConnectionInfo =
   , password :: String
   }
 
+type Sqlite3ConnectionInfo = 
+  { filename :: String ,
+    memory :: Boolean}
+
+data ConnectionInfo = Postgres PgConnectionInfo |
+                      Sqlite3 Sqlite3ConnectionInfo
+
 mkConnectionString :: ConnectionInfo -> ConnectionString
-mkConnectionString ci =
-    "postgres://"
-  <> ci.user <> ":"
-  <> ci.password <> "@"
-  <> ci.host <> ":"
-  <> show ci.port <> "/"
-  <> ci.db
+mkConnectionString (Postgres ci) =  mkPgConnectionString ci
+mkConnectionString (Sqlite3  ci) =  mkSqliteConnectionString ci
+  where 
+    mkSqliteConnectionString :: Sqlite3ConnectionInfo -> ConnectionString
+    mkSqliteConnectionString sci = 
+      "sqlite3://" <> if (sci.memory) then ":memory:"
+                                      else sci.filename
+    mkPgConnectionString :: PgConnectionInfo -> ConnectionString
+    mkPgConnectionString ci =
+        "postgres://"
+      <> ci.user <> ":"
+      <> ci.password <> "@"
+      <> ci.host <> ":"
+      <> show ci.port <> "/"
+      <> ci.db
 
 -- | Makes a connection to the database.
 connect :: forall eff. ConnectionInfo -> Aff (db :: DB | eff) Connection
