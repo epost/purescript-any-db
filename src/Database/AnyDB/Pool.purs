@@ -7,6 +7,7 @@ module Database.AnyDB.Pool
   , closePool
   ) where
 
+import Prelude
 import Control.Alt
 import Control.Monad.Eff
 import Control.Monad.Trans
@@ -29,61 +30,12 @@ createPool :: forall eff. ConnectionInfo -> Eff (db :: DB | eff) Pool
 createPool ci = createPoolFromString $ mkConnectionString ci
 
 -- | Create a connection pool. Remember to call `closePool`.
-foreign import createPoolFromString """
-  function createPoolFromString(conString) {
-    return function() {
-      var anyDB = require('any-db');
-      return anyDB.createPool(conString);
-    }
-  }
-""" :: forall eff. ConnectionString -> Eff (db :: DB | eff) Pool
+foreign import createPoolFromString :: forall eff. ConnectionString -> Eff (db :: DB | eff) Pool
 
 -- | Close the connection pool.
-foreign import closePool """
-  function closePool(pool) {
-    return function() {
-      return pool.close();
-    }
-  }
-""" :: forall eff. Pool -> Eff (db :: DB | eff) Unit
+foreign import closePool :: forall eff. Pool -> Eff (db :: DB | eff) Unit
 
 -- | Run a database action with a connection from the specified `Pool`.
-foreign import withPool """
-function withPool(pool) {
-  return function(connectionToDbAction) {
-    return function(handleDbResult, handleDbActionError) {
-
-      pool._pool.acquire(function(err, con) {
-
-        function release(connection) {
-          pool._reset(connection, function(err) {
-            if (err) return pool.destroy(connection);
-            pool._pool.release(connection);
-          });
-        }
-
-        function handleDbResultThenReleaseConnection(err, succ) {
-            handleDbResult(err, succ);
-            release(con);
-        }
-
-        function handleDbActionErrorThenReleaseConnection(err, succ) {
-            handleDbActionError(err, succ);
-            release(con);
-        }
-
-        if (err) {
-          console.log('withPool$prime: error acquiring connection: ', err);
-          handleDbActionError(err);
-        } else {
-          var dbAction = connectionToDbAction(con);
-          dbAction(handleDbResultThenReleaseConnection,
-                   handleDbActionErrorThenReleaseConnection);
-        }
-      });
-    };
-  };
-}"""
- :: forall eff a. Pool
+foreign import withPool :: forall eff a. Pool
                -> (Connection -> Aff (db :: DB | eff) a)
                -> Aff (db :: DB | eff) a

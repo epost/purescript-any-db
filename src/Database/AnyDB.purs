@@ -14,6 +14,7 @@ module Database.AnyDB
   , withConnection
   ) where
 
+import Prelude
 import Control.Alt
 import Control.Monad.Eff
 import Control.Monad.Trans
@@ -41,7 +42,7 @@ type ConnectionString = String
 type ConnectionInfo =
   { host :: String
   , db :: String
-  , port :: Number
+  , port :: Int
   , user :: String
   , password :: String
   }
@@ -57,10 +58,10 @@ mkConnectionString ci =
 
 -- | Makes a connection to the database.
 connect :: forall eff. ConnectionInfo -> Aff (db :: DB | eff) Connection
-connect = connect' <<< mkConnectionString
+connect = connect_ <<< mkConnectionString
 
 -- | Runs a query and returns nothing.
-execute :: forall eff a. Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) Unit
+execute :: forall eff a. Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) Unit
 execute (Query sql) params con = void $ runQuery sql params con
 
 -- | Runs a query and returns nothing
@@ -69,20 +70,20 @@ execute_ (Query sql) con = void $ runQuery_ sql con
 
 -- | Runs a query and returns all results.
 query :: forall eff a. (IsForeign a) =>
-         Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) [F a]
+         Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Array (F a))
 query (Query sql) params con = do
   rows <- runQuery sql params con
   pure $ read <$> rows
 
 -- | Just like `query` but does not make any param replacement
-query_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) [a]
+query_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Array a) 
 query_ (Query sql) con = do
   rows <- runQuery_ sql con
   either liftError pure (sequence $ read <$> rows)
 
 -- | Runs a query and returns the first row, if any
 queryOne :: forall eff a. (IsForeign a) =>
-            Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) (Maybe a)
+            Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryOne (Query sql) params con = do
   rows <- runQuery sql params con
   maybe (pure Nothing) (either liftError (pure <<< Just)) $ read <$> (rows !! 0)
@@ -95,7 +96,7 @@ queryOne_ (Query sql) con = do
 
 -- | Runs a query and returns a single value, if any.
 queryValue :: forall eff a. (IsForeign a) =>
-              Query a -> [SqlValue] -> Connection -> Aff (db :: DB | eff) (Maybe a)
+              Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryValue (Query sql) params con = do
   val <- runQueryValue sql params con
   pure $ either (const Nothing) Just (read val)
@@ -119,84 +120,14 @@ withConnection info p = do
 liftError :: forall e a. ForeignError -> Aff e a
 liftError err = throwError $ error (show err)
 
-foreign import connect' """
-  function connect$prime(conString) {
-    return function(success, error) {
-      var anyDB = require('any-db');
-      anyDB.createConnection(conString, function(err, con) {
-        if (err) {
-          error(err);
-        } else {
-          success(con);
-        }
-      });
-    };
-  }
-  """ :: forall eff. ConnectionString -> Aff (db :: DB | eff) Connection
+foreign import connect_ :: forall eff. ConnectionString -> Aff (db :: DB | eff) Connection
 
-foreign import runQuery_ """
-  function runQuery_(queryStr) {
-    return function(con) {
-      return function(success, error) {
-        con.query(queryStr, function(err, result) {
-          if (err) {
-            error(err);
-          } else {
-            success(result.rows);
-          }
-        })
-      };
-    };
-  }
-  """ :: forall eff. String -> Connection -> Aff (db :: DB | eff) [Foreign]
+foreign import runQuery_ :: forall eff. String -> Connection -> Aff (db :: DB | eff) (Array Foreign)
 
-foreign import runQuery """
-  function runQuery(queryStr) {
-    return function(params) {
-      return function(con) {
-        return function(success, error) {
-          con.query(queryStr, params, function(err, result) {
-            if (err) return error(err);
-            success(result.rows);
-          })
-        };
-      };
-    }
-  }
-  """ :: forall eff. String -> [SqlValue] -> Connection -> Aff (db :: DB | eff) [Foreign]
+foreign import runQuery :: forall eff. String -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Array Foreign)
 
-foreign import runQueryValue_ """
-  function runQueryValue_(queryStr) {
-    return function(con) {
-      return function(success, error) {
-        con.query(queryStr, function(err, result) {
-          if (err) return error(err);
-          success(result.rows.length > 0 ? result.rows[0][result.fields[0].name] : undefined);
-        })
-      };
-    };
-  }
-  """ :: forall eff. String -> Connection -> Aff (db :: DB | eff) Foreign
+foreign import runQueryValue_ :: forall eff. String -> Connection -> Aff (db :: DB | eff) Foreign
 
-foreign import runQueryValue """
-  function runQueryValue(queryStr) {
-    return function(params) {
-      return function(con) {
-        return function(success, error) {
-          con.query(queryStr, params, function(err, result) {
-            if (err) return error(err);
-            success(result.rows.length > 0 ? result.rows[0][result.fields[0].name] : undefined);
-          })
-        };
-      };
-    }
-  }
-  """ :: forall eff. String -> [SqlValue] -> Connection -> Aff (db :: DB | eff) Foreign
+foreign import runQueryValue :: forall eff. String -> Array SqlValue -> Connection -> Aff (db :: DB | eff) Foreign
 
-foreign import close """
-  function close(con) {
-    return function() {
-      con.end();
-    };
-  }
-  """ :: forall eff. Connection -> Eff (db :: DB | eff) Unit
+foreign import close :: forall eff. Connection -> Eff (db :: DB | eff) Unit
