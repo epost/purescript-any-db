@@ -2,7 +2,7 @@
 
 * Caveat
 
-This is alpha quality software. It doesn't work with the latest versions of the PureScript compiler (yet).
+This is alpha quality software.
 
 * About
 
