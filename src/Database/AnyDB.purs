@@ -4,6 +4,8 @@ module Database.AnyDB
   , DB()
   , ConnectionInfo(..)
   , ConnectionString()
+  , PgConnectionInfo()
+  , Sqlite3ConnectionInfo()
   , mkConnectionString
   , connect
   , close
@@ -35,6 +37,8 @@ newtype Query a = Query String
 
 instance eqQuery :: Eq (Query a) where
   eq (Query a) (Query b) = a == b
+instance showQuery :: Show (Query a) where
+  show (Query n) = n
 
 foreign import data Connection :: *
 
@@ -42,20 +46,20 @@ foreign import data DB :: !
 
 type ConnectionString = String
 
-type PgConnectionInfo =
+type PgConnectionInfo = 
   { host :: String
   , db :: String
   , port :: Int
   , user :: String
-  , password :: String
+  , password :: String 
   }
 
 type Sqlite3ConnectionInfo = 
-  { filename :: String ,
-    memory :: Boolean}
+  { filename :: String
+  , memory :: Boolean}
 
-data ConnectionInfo = Postgres PgConnectionInfo |
-                      Sqlite3 Sqlite3ConnectionInfo
+data ConnectionInfo = Postgres PgConnectionInfo
+                    | Sqlite3 Sqlite3ConnectionInfo
 
 mkConnectionString :: ConnectionInfo -> ConnectionString
 mkConnectionString (Postgres ci) = "postgres://"
