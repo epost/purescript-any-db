@@ -1,0 +1,6 @@
+{
+  "devDependencies": {
+    "any-db-sqlite3": "^2.1.4",
+    "any-db": "^2.1.0"
+  }
+}

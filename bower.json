@@ -25,6 +25,7 @@
     "purescript-integers": "~0.2.1"
   },
   "devDependencies": {
-    "purescript-console": "~0.1.1"
+    "purescript-console": "~0.1.1",
+    "purescript-test-unit": "~3.0.0"
   }
 }
