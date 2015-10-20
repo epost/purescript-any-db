@@ -33,13 +33,11 @@ main = runAff (log <<< show) (const $ log "All ok") $ do
   exampleUsingWithPool
   exampleUsingWithTransaction
 
-connectionInfo =
-  Postgres { host: "localhost"
-           , db: "test"
-           , port: 5432
-           , user: "testuser"
-           , password: "test"
-           }
+connectionInfo = Postgres { host: "localhost"
+                          , db: "test"
+                          , port: 5432
+                          , user: "testuser"
+                          , password: "test" }
 
 exampleUsingWithConnection :: forall eff. Aff (console :: CONSOLE, db :: DB | eff) Unit
 exampleUsingWithConnection = withConnection connectionInfo $ \c -> do

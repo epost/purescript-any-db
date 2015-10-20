@@ -1,9 +1,11 @@
 module Test.Main where
 
-import Test.Unit
 import qualified Test.Sqlite3 as SL
 import qualified Test.Postgres as PG
 
-main = runTest do
+import Test.Spec.Runner           (run)
+import Test.Spec.Reporter.Console (consoleReporter)
+
+main = run [consoleReporter] do
   SL.main
   --PG.main
