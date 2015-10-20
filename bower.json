@@ -1,9 +1,7 @@
 {
   "name": "purescript-any-db",
   "version": "0.1.0",
-  "moduleType": [
-    "node"
-  ],
+  "moduleType": ["node"],
   "authors": [
     { "name": "Erik Post", "email": "erik@shinsetsu.nl", "homepage": "http://www.shinsetsu.nl"  },
     { "name": "Antti Holvikari" }
