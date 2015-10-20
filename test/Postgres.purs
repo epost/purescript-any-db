@@ -19,6 +19,7 @@ import Data.Foreign
 import Data.Foreign.Class
 --import Data.Foreign.Index
 import Control.Monad.Aff
+import Test.Shared
 
 main = runAff (log <<< show) (const $ log "All ok") $ do
   liftEff <<< log $ "connecting to " <> mkConnectionString connectionInfo <> "..."
@@ -31,11 +32,6 @@ main = runAff (log <<< show) (const $ log "All ok") $ do
   exampleQueries
   exampleUsingWithPool
   exampleUsingWithTransaction
-
-data Artist = Artist
-  { name :: String
-  , year :: Number
-  }
 
 connectionInfo =
   Postgres { host: "localhost"
@@ -95,12 +91,3 @@ exampleUsingWithTransaction =
 printRows :: forall a eff. (Show a) => Array a -> Eff (console :: CONSOLE | eff) Unit
 printRows rows = log $ "result:\n" <> foldMap stringify rows
   where stringify = show >>> flip (<>) "\n"
-
-instance artistShow :: Show Artist where
-  show (Artist p) = "Artist (" <> p.name <> ", " <> show p.year <> ")"
-
-instance artistIsForeign :: IsForeign Artist where
-  read obj = do
-    n <- readProp "name" obj
-    y <- readProp "year" obj
-    return $ Artist { name: n, year: y }
