@@ -5,22 +5,11 @@
     "node"
   ],
   "authors": [
-    {
-      "name": "Erik Post",
-      "email": "erik@shinsetsu.nl",
-      "homepage": "http://www.shinsetsu.nl"
-    },
-    {
-      "name": "Antti Holvikari"
-    }
+    { "name": "Erik Post", "email": "erik@shinsetsu.nl", "homepage": "http://www.shinsetsu.nl"  },
+    { "name": "Antti Holvikari" }
   ],
   "license": "MIT",
-  "keywords": [
-    "purescript",
-    "database",
-    "sql",
-    "postgres"
-  ],
+  "keywords": ["purescript", "database", "sql", "postgres"],
   "ignore": [
     "**/.*",
     "node_modules",
@@ -40,8 +29,5 @@
   "devDependencies": {
     "purescript-console": "~0.1.1",
     "purescript-spec": "~0.7.2"
-  },
-  "resolutions": {
-    "purescript-aff": "~0.13.0"
   }
 }

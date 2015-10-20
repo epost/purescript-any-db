@@ -46,14 +46,17 @@ foreign import data DB :: !
 
 type ConnectionString = String
 
-type PgConnectionInfo = { host :: String
-                        , db :: String
-                        , port :: Int
-                        , user :: String
-                        , password :: String }
+type PgConnectionInfo = 
+  { host :: String
+  , db :: String
+  , port :: Int
+  , user :: String
+  , password :: String 
+  }
 
-type Sqlite3ConnectionInfo = { filename :: String
-                             , memory :: Boolean}
+type Sqlite3ConnectionInfo = 
+  { filename :: String
+  , memory :: Boolean}
 
 data ConnectionInfo = Postgres PgConnectionInfo
                     | Sqlite3 Sqlite3ConnectionInfo
