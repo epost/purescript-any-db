@@ -84,10 +84,10 @@ execute_ (Query sql) con = void $ runQuery_ sql con
 
 -- | Runs a query and returns all results.
 query :: forall eff a. (IsForeign a) =>
-         Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Array (F a))
+         Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Array a)
 query (Query sql) params con = do
   rows <- runQuery sql params con
-  pure $ read <$> rows
+  either liftError pure (sequence $ read <$> rows)
 
 -- | Just like `query` but does not make any param replacement
 query_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Array a) 
