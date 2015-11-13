@@ -22,7 +22,8 @@
     "purescript-foldable-traversable": "~0.4.0",
     "purescript-transformers": "~0.8.1",
     "purescript-aff": "~0.13.0",
-    "purescript-integers": "~0.2.1"
+    "purescript-integers": "~0.2.1",
+    "purescript-node-buffer": "master"
   },
   "devDependencies": {
     "purescript-console": "~0.1.1",
