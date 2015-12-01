@@ -23,7 +23,8 @@
     "purescript-transformers": "~0.8.1",
     "purescript-aff": "~0.13.0",
     "purescript-integers": "~0.2.1",
-    "purescript-node-buffer": "master"
+    "purescript-node-buffer": "master",
+    "purescript-datetime": "^0.9.0"
   },
   "devDependencies": {
     "purescript-console": "~0.1.1",
