@@ -10,7 +10,6 @@ import Control.Monad.Eff.Console
 import Control.Monad.Eff
 import Control.Monad.Eff.Class
 import Control.Monad.Cont.Trans
-import Control.Monad.Trans
 import Data.Array
 import Data.Foldable
 import Data.Either
@@ -45,7 +44,7 @@ exampleUsingWithConnection = withConnection connectionInfo $ \c -> do
   execute_ (Query "insert into artist values ('Led Zeppelin', 1968)") c
   execute_ (Query "insert into artist values ('Deep Purple', 1968)") c
   year <- queryValue_ (Query "insert into artist values ('Fairport Convention', 1967) returning year" :: Query Number) c
-  liftEff $ print (show year)
+  liftEff $ log (show year)
   artists <- query_ (Query "select * from artist" :: Query Artist) c
   liftEff $ printRows artists
 

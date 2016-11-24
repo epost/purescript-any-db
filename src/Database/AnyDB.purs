@@ -17,21 +17,23 @@ module Database.AnyDB
   ) where
 
 import Prelude
-import Control.Alt
-import Control.Monad.Eff
-import Control.Monad.Trans
-import Data.Either
-import Data.Array
-import Data.Foreign
-import Data.Foreign.Class
-import Data.Maybe
-import Control.Monad.Aff
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Exception(Error(), error)
+import Control.Monad.Eff (Eff)
+import Data.Either (either)
+import Data.Array ((!!))
+import Data.Foreign (Foreign, ForeignError)
+import Data.Foreign.Class (class IsForeign, read)
+import Data.List.Types (NonEmptyList)
+import Data.Maybe (Maybe(..), maybe)
+import Data.Newtype (unwrap)
+import Data.NonEmpty (head)
+import Control.Monad.Aff (Aff, finally)
+import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Exception (error)
 import Control.Monad.Error.Class (throwError)
+import Control.Monad.Except (runExcept)
 import Data.Traversable (sequence)
 
-import Database.AnyDB.SqlValue
+import Database.AnyDB.SqlValue (SqlValue)
 
 newtype Query a = Query String
 
@@ -87,39 +89,39 @@ query :: forall eff a. (IsForeign a) =>
          Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Array a)
 query (Query sql) params con = do
   rows <- runQuery sql params con
-  either liftError pure (sequence $ read <$> rows)
+  either liftError pure $ runExcept (sequence $ read <$> rows)
 
 -- | Just like `query` but does not make any param replacement
 query_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Array a) 
 query_ (Query sql) con = do
   rows <- runQuery_ sql con
-  either liftError pure (sequence $ read <$> rows)
+  either liftError pure $ runExcept (sequence $ read <$> rows)
 
 -- | Runs a query and returns the first row, if any
 queryOne :: forall eff a. (IsForeign a) =>
             Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryOne (Query sql) params con = do
   rows <- runQuery sql params con
-  maybe (pure Nothing) (either liftError (pure <<< Just)) $ read <$> (rows !! 0)
+  maybe (pure Nothing) ((either liftError (pure <<< Just)) <<< runExcept) $ read <$> (rows !! 0)
 
 -- | Just like `queryOne` but does not make any param replacement
 queryOne_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryOne_ (Query sql) con = do
   rows <- runQuery_ sql con
-  maybe (pure Nothing) (either liftError (pure <<< Just)) $ read <$> (rows !! 0)
+  maybe (pure Nothing) ((either liftError (pure <<< Just)) <<< runExcept) $ read <$> (rows !! 0)
 
 -- | Runs a query and returns a single value, if any.
 queryValue :: forall eff a. (IsForeign a) =>
               Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryValue (Query sql) params con = do
   val <- runQueryValue sql params con
-  pure $ either (const Nothing) Just (read val)
+  pure $ either (const Nothing) Just $ runExcept (read val)
 
 -- | Just like `queryValue` but does not make any param replacement
 queryValue_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryValue_ (Query sql) con = do
   val <- runQueryValue_ sql con
-  either liftError (pure <<< Just) $ read val
+  either liftError (pure <<< Just) $ runExcept $ read val
 
 -- | Connects to the database, calls the provided function with the connection
 -- | and returns the results.
@@ -131,8 +133,8 @@ withConnection info p = do
   con <- connect info
   finally (p con) $ liftEff (close con)
 
-liftError :: forall e a. ForeignError -> Aff e a
-liftError err = throwError $ error (show err)
+liftError :: forall e a. NonEmptyList ForeignError -> Aff e a
+liftError = throwError <<< error <<< show <<< head <<< unwrap
 
 foreign import connect_ :: forall eff. ConnectionString -> Aff (db :: DB | eff) Connection
 

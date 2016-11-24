@@ -7,21 +7,10 @@ module Database.AnyDB.Pool
   , closePool
   ) where
 
-import Prelude
-import Control.Alt
-import Control.Monad.Eff
-import Control.Monad.Trans
-import Control.Monad.Aff
-import Control.Monad.Eff.Class
-import Control.Monad.Eff.Exception(Error(), error)
-import Control.Monad.Error.Class (throwError)
-import Data.Either
-import Data.Array
-import Data.Foreign
-import Data.Foreign.Class
-import Data.Maybe
-import Data.Traversable (sequence)
-import Database.AnyDB
+import Prelude (Unit, ($))
+import Control.Monad.Eff (Eff)
+import Control.Monad.Aff (Aff)
+import Database.AnyDB (Connection, ConnectionInfo, ConnectionString, DB, mkConnectionString)
 
 foreign import data Pool :: *
 

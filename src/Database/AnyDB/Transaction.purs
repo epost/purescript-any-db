@@ -3,10 +3,9 @@ module Database.AnyDB.Transaction
   , withTransaction
   ) where
 
-import Prelude
-import Control.Monad.Aff
-import Control.Monad.Eff
-import Database.AnyDB
+import Prelude (Unit, bind, pure)
+import Control.Monad.Aff (Aff)
+import Database.AnyDB (Connection, DB)
 
 foreign import data Transaction :: *
 
@@ -18,7 +17,7 @@ withTransaction p con = do
   tx  <- beginTransaction con
   res <- p con
   commitTransaction tx
-  return res
+  pure res
 
 foreign import beginTransaction :: forall eff. Connection -> Aff (db :: DB | eff) Transaction
 
