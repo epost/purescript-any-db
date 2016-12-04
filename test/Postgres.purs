@@ -1,31 +1,71 @@
 module Test.Postgres where
 
-import Prelude (class Show, Unit, bind, const, flip, show, ($), (<<<), (<>), (>>>))
-import Database.AnyDB (ConnectionInfo(..), DB, Query(..), close, connect, execute_, mkConnectionString, query, queryOne_, queryValue_, query_, withConnection)
-import Database.AnyDB.SqlValue (toSql)
-import Database.AnyDB.Pool (closePool, createPool, withPool)
-import Database.AnyDB.Transaction (withTransaction)
-import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.Aff
 import Control.Monad.Eff (Eff)
 import Control.Monad.Eff.Class (liftEff)
+import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.State.Trans (StateT)
 import Data.Foldable (foldMap)
-import Data.Either (either)
+import Data.Identity (Identity)
 import Data.Maybe (Maybe)
-import Control.Monad.Aff
-import Test.Shared (Artist)
+import Database.AnyDB (ConnectionInfo(Postgres), DB, Query(Query), close, connect, execute_, query, queryOne_, queryValue_, query_, withConnection)
+import Database.AnyDB.Pool (closePool, createPool, withPool)
+import Database.AnyDB.SqlValue (toSql)
+import Database.AnyDB.Transaction (withTransaction)
+import Prelude (class Show, Unit, bind, flip, show, ($), (<>), (>>>))
+import Test.Shared (Artist(..))
+import Test.Spec (Group, describe, it)
+import Test.Spec.Assertions (shouldEqual)
 
-main = runAff (log <<< show) (const $ log "All ok") $ do
-  liftEff <<< log $ "connecting to " <> mkConnectionString connectionInfo <> "..."
-  exampleUsingWithConnection
-  exampleLowLevel
+main :: forall eff.
+  StateT
+    (Array
+       (Group
+          (Aff
+             ( db :: DB
+             | eff
+             )
+             Unit
+          )
+       )
+    )
+    Identity
+    Unit
+main = do
+  describe "integration test PostgreSQL + Photobooth type" do
+    it "should make a db, drop it, make it again, insert an Artist row, and get it back out" do
+        withConnection connectionInfo \conn -> do 
+          execute_ (Query "CREATE TABLE artist (name CHAR(20), year INTEGER)") conn
+          execute_ (Query "DROP TABLE artist") conn
+          execute_ (Query "CREATE TABLE artist (name CHAR(20), year INTEGER)") conn
+          execute_ (Query "INSERT INTO artist VALUES ('Led Zeppelin', '1968')") conn
+          result <- query_   (Query "SELECT * from artist":: Query Artist) conn
+          result `shouldEqual` [Artist {name: "Led Zeppelin", year: 1968.0 }]
 
-  res <- attempt exampleError
-  liftEff $ either (const $ log "got an error, like we should") (const $ log "FAIL") res
 
-  exampleQueries
-  exampleUsingWithPool
-  exampleUsingWithTransaction
+-- !!! Move to spec format.
+--main :: forall eff.
+--  Eff
+--    ( console :: CONSOLE
+--    , db :: DB
+--    | eff
+--    )
+--    Unit
+--main = runAff logShow (const $ log "All ok") $ do
+--  liftEff <<< log $ "connecting to " <> mkConnectionString connectionInfo <> "..."
+--  exampleUsingWithConnection
+--  exampleLowLevel
+--
+--  res <- attempt exampleError
+--  liftEff $ either (const $ log "got an error, like we should") (const $ log "FAIL") res
+--
+--  exampleQueries
+--  exampleUsingWithPool
+--  exampleUsingWithTransaction
+--  pure unit
+--  --result `shouldEqual` [Artist {name: "Led Zeppelin", year: 1968.0 }]
 
+connectionInfo :: ConnectionInfo
 connectionInfo = Postgres { host: "localhost"
                           , db: "test"
                           , port: 5432
