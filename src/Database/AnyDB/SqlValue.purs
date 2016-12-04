@@ -1,14 +1,14 @@
 module Database.AnyDB.SqlValue
   ( SqlValue()
-  , IsSqlValue
+  , class IsSqlValue
   , toSql
   ) where
 
-import Prelude
-import Data.Int
-import Data.Maybe
-import Data.Date (Date())
-import Node.Buffer (Buffer())
+import Data.Date (Date)
+import Data.Int (toNumber)
+import Data.Maybe (Maybe(..))
+import Node.Buffer (Buffer)
+import Prelude ((<<<))
 
 foreign import data SqlValue :: *
 

@@ -1,25 +1,18 @@
 module Test.Postgres where
 
-import Prelude
-import Database.AnyDB
-import Database.AnyDB.SqlValue
-import Database.AnyDB.Pool
-import Database.AnyDB.Transaction
-import Control.Monad.Eff.Console
---import Debug.Trace
-import Control.Monad.Eff
-import Control.Monad.Eff.Class
-import Control.Monad.Cont.Trans
-import Control.Monad.Trans
-import Data.Array
-import Data.Foldable
-import Data.Either
-import Data.Maybe
-import Data.Foreign
-import Data.Foreign.Class
---import Data.Foreign.Index
+import Prelude (class Show, Unit, bind, const, flip, show, ($), (<<<), (<>), (>>>))
+import Database.AnyDB (ConnectionInfo(..), DB, Query(..), close, connect, execute_, mkConnectionString, query, queryOne_, queryValue_, query_, withConnection)
+import Database.AnyDB.SqlValue (toSql)
+import Database.AnyDB.Pool (closePool, createPool, withPool)
+import Database.AnyDB.Transaction (withTransaction)
+import Control.Monad.Eff.Console (CONSOLE, log)
+import Control.Monad.Eff (Eff)
+import Control.Monad.Eff.Class (liftEff)
+import Data.Foldable (foldMap)
+import Data.Either (either)
+import Data.Maybe (Maybe)
 import Control.Monad.Aff
-import Test.Shared
+import Test.Shared (Artist)
 
 main = runAff (log <<< show) (const $ log "All ok") $ do
   liftEff <<< log $ "connecting to " <> mkConnectionString connectionInfo <> "..."
@@ -45,7 +38,7 @@ exampleUsingWithConnection = withConnection connectionInfo $ \c -> do
   execute_ (Query "insert into artist values ('Led Zeppelin', 1968)") c
   execute_ (Query "insert into artist values ('Deep Purple', 1968)") c
   year <- queryValue_ (Query "insert into artist values ('Fairport Convention', 1967) returning year" :: Query Number) c
-  liftEff $ print (show year)
+  liftEff $ log (show year)
   artists <- query_ (Query "select * from artist" :: Query Artist) c
   liftEff $ printRows artists
 
