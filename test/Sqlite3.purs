@@ -1,16 +1,17 @@
 module Test.Sqlite3 where
 
-import Prelude
-import Test.Shared
-import Control.Monad.Aff
-import Database.AnyDB
+import Prelude (Unit, bind)
+import Test.Shared (Artist(..))
+import Database.AnyDB (ConnectionInfo(..), DB, Query(..), execute_, query_, withConnection)
 
-import Test.Spec                  (describe, pending, it)
+import Test.Spec                  (Spec, describe, it)
 import Test.Spec.Assertions       (shouldEqual)
 
+connectionInfo :: ConnectionInfo
 connectionInfo = Sqlite3 { filename: "test"
                          , memory: true }
 
+main :: forall r. Spec (db :: DB | r) Unit
 main = do
   describe "integration test Sqlite3 + Photobooth type" do
     it "should make a db, drop it, make it again, insert an Artist row, and get it back out" do

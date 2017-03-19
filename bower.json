@@ -15,19 +15,19 @@
     "output"
   ],
   "dependencies": {
-    "purescript-aff": "~0.13.0",
-    "purescript-arrays": "~0.4.2",
-    "purescript-control": "~0.3.1",
-    "purescript-datetime": "^0.9.0",
-    "purescript-either": "~0.2.3",
-    "purescript-foldable-traversable": "~0.4.0",
-    "purescript-foreign": "~0.7.0",
-    "purescript-integers": "~0.2.1",
-    "purescript-node-buffer": "~0.2.0",
-    "purescript-transformers": "~0.8.1"
+    "purescript-aff": "^2.0.1",
+    "purescript-arrays": "^3.0.1",
+    "purescript-control": "^2.0.0",
+    "purescript-datetime": "^2.0.0",
+    "purescript-either": "^2.0.0",
+    "purescript-foldable-traversable": "^2.0.0",
+    "purescript-foreign": "^3.0.1",
+    "purescript-integers": "^2.1.0",
+    "purescript-node-buffer": "^2.0.0",
+    "purescript-transformers": "^2.0.2"
   },
   "devDependencies": {
-    "purescript-console": "~0.1.1",
-    "purescript-spec": "~0.7.2"
+    "purescript-console": "^2.0.0",
+    "purescript-spec": "~0.10.0"
   }
 }

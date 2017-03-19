@@ -1,6 +1,6 @@
 module Database.AnyDB.SqlValue
   ( SqlValue()
-  , IsSqlValue
+  , class IsSqlValue
   , toSql
   ) where
 
