@@ -10,7 +10,7 @@ import Data.Maybe
 import Data.Date (Date())
 import Node.Buffer (Buffer())
 
-foreign import data SqlValue :: *
+foreign import data SqlValue :: Type
 
 class IsSqlValue a where
   toSql :: a -> SqlValue
@@ -31,7 +31,7 @@ instance isSqlValueMaybe :: (IsSqlValue a) => IsSqlValue (Maybe a) where
   toSql Nothing = nullSqlValue
   toSql (Just x) = toSql x
 
-instance isSqlValueDate :: IsSqlValue Date where 
+instance isSqlValueDate :: IsSqlValue Date where
   toSql = unsafeToSqlValue
 
 foreign import unsafeToSqlValue :: forall a. a -> SqlValue

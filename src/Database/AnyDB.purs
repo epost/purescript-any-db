@@ -17,11 +17,11 @@ module Database.AnyDB
   ) where
 
 import Prelude
-import Control.Monad.Eff (Eff)
+import Control.Monad.Eff (kind Effect, Eff)
 import Data.Either (either)
 import Data.Array ((!!))
 import Data.Foreign (Foreign, ForeignError)
-import Data.Foreign.Class (class IsForeign, read)
+import Data.Foreign.Class (class Decode, decode)
 import Data.List.Types (NonEmptyList)
 import Data.Maybe (Maybe(..), maybe)
 import Data.Newtype (unwrap)
@@ -42,21 +42,21 @@ instance eqQuery :: Eq (Query a) where
 instance showQuery :: Show (Query a) where
   show (Query n) = n
 
-foreign import data Connection :: *
+foreign import data Connection :: Type
 
-foreign import data DB :: !
+foreign import data DB :: Effect
 
 type ConnectionString = String
 
-type PgConnectionInfo = 
+type PgConnectionInfo =
   { host :: String
   , db :: String
   , port :: Int
   , user :: String
-  , password :: String 
+  , password :: String
   }
 
-type Sqlite3ConnectionInfo = 
+type Sqlite3ConnectionInfo =
   { filename :: String
   , memory :: Boolean}
 
@@ -85,43 +85,43 @@ execute_ :: forall eff a. Query a -> Connection -> Aff (db :: DB | eff) Unit
 execute_ (Query sql) con = void $ runQuery_ sql con
 
 -- | Runs a query and returns all results.
-query :: forall eff a. (IsForeign a) =>
+query :: forall eff a. (Decode a) =>
          Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Array a)
 query (Query sql) params con = do
   rows <- runQuery sql params con
-  either liftError pure $ runExcept (sequence $ read <$> rows)
+  either liftError pure $ runExcept (sequence $ decode <$> rows)
 
 -- | Just like `query` but does not make any param replacement
-query_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Array a) 
+query_ :: forall eff a. (Decode a) => Query a -> Connection -> Aff (db :: DB | eff) (Array a)
 query_ (Query sql) con = do
   rows <- runQuery_ sql con
-  either liftError pure $ runExcept (sequence $ read <$> rows)
+  either liftError pure $ runExcept (sequence $ decode <$> rows)
 
 -- | Runs a query and returns the first row, if any
-queryOne :: forall eff a. (IsForeign a) =>
+queryOne :: forall eff a. (Decode a) =>
             Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryOne (Query sql) params con = do
   rows <- runQuery sql params con
-  maybe (pure Nothing) ((either liftError (pure <<< Just)) <<< runExcept) $ read <$> (rows !! 0)
+  maybe (pure Nothing) ((either liftError (pure <<< Just)) <<< runExcept) $ decode <$> (rows !! 0)
 
 -- | Just like `queryOne` but does not make any param replacement
-queryOne_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Maybe a)
+queryOne_ :: forall eff a. (Decode a) => Query a -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryOne_ (Query sql) con = do
   rows <- runQuery_ sql con
-  maybe (pure Nothing) ((either liftError (pure <<< Just)) <<< runExcept) $ read <$> (rows !! 0)
+  maybe (pure Nothing) ((either liftError (pure <<< Just)) <<< runExcept) $ decode <$> (rows !! 0)
 
 -- | Runs a query and returns a single value, if any.
-queryValue :: forall eff a. (IsForeign a) =>
+queryValue :: forall eff a. (Decode a) =>
               Query a -> Array SqlValue -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryValue (Query sql) params con = do
   val <- runQueryValue sql params con
-  pure $ either (const Nothing) Just $ runExcept (read val)
+  pure $ either (const Nothing) Just $ runExcept (decode val)
 
 -- | Just like `queryValue` but does not make any param replacement
-queryValue_ :: forall eff a. (IsForeign a) => Query a -> Connection -> Aff (db :: DB | eff) (Maybe a)
+queryValue_ :: forall eff a. (Decode a) => Query a -> Connection -> Aff (db :: DB | eff) (Maybe a)
 queryValue_ (Query sql) con = do
   val <- runQueryValue_ sql con
-  either liftError (pure <<< Just) $ runExcept $ read val
+  either liftError (pure <<< Just) $ runExcept $ decode val
 
 -- | Connects to the database, calls the provided function with the connection
 -- | and returns the results.
