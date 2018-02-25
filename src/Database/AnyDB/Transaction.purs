@@ -3,11 +3,11 @@ module Database.AnyDB.Transaction
   , withTransaction
   ) where
 
-import Prelude (Unit, bind, pure)
+import Prelude (Unit, bind, pure, discard)
 import Control.Monad.Aff (Aff)
 import Database.AnyDB (Connection, DB)
 
-foreign import data Transaction :: *
+foreign import data Transaction :: Type
 
 withTransaction :: forall eff a.
      (Connection -> Aff (db :: DB | eff) a)

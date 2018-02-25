@@ -12,7 +12,7 @@ import Control.Monad.Eff (Eff)
 import Control.Monad.Aff (Aff)
 import Database.AnyDB (Connection, ConnectionInfo, ConnectionString, DB, mkConnectionString)
 
-foreign import data Pool :: *
+foreign import data Pool :: Type
 
 -- | Create a connection pool.
 createPool :: forall eff. ConnectionInfo -> Eff (db :: DB | eff) Pool
